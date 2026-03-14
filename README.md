@@ -134,4 +134,4 @@ com.example.profileapp/
 - **ViewModel + State** (state management dasar)
 
 ## Screenshot Aplikasi
-
+<img width="1080" height="2400" alt="Image" src="https://github.com/user-attachments/assets/5bf18c11-c7e3-48f2-966c-ec86575752ff" />
