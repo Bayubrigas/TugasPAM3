@@ -1,5 +1,8 @@
 package com.example.profileapp.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -22,8 +25,6 @@ import androidx.compose.ui.unit.sp
 
 // ============================================================
 // COMPOSABLE 1: ProfileHeader
-// Menampilkan foto profil circular, nama, dan role/jabatan
-// Menggunakan: Box, Column, Image (Icon sebagai avatar placeholder)
 // ============================================================
 @Composable
 fun ProfileHeader(
@@ -42,15 +43,13 @@ fun ProfileHeader(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Avatar circular menggunakan Box (layer background + Icon)
-        // Sesuai materi: Box untuk stack/overlay elemen
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(100.dp)
-                .clip(CircleShape)                          // clip ke bentuk lingkaran
+                .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .border(3.dp, Color.White, CircleShape)    // border putih di luar
+                .border(3.dp, Color.White, CircleShape)
         ) {
             Icon(
                 imageVector = Icons.Default.Person,
@@ -60,7 +59,6 @@ fun ProfileHeader(
             )
         }
 
-        // Nama pengguna - Text dengan styling
         Text(
             text = name,
             fontSize = 24.sp,
@@ -69,7 +67,6 @@ fun ProfileHeader(
             textAlign = TextAlign.Center
         )
 
-        // Role/jabatan - Text dengan warna lebih transparan
         Text(
             text = role,
             fontSize = 14.sp,
@@ -82,8 +79,6 @@ fun ProfileHeader(
 
 // ============================================================
 // COMPOSABLE 2: InfoItem
-// Satu baris informasi: icon + label + nilai
-// Menggunakan: Row, Icon, Text, Modifier
 // ============================================================
 @Composable
 fun InfoItem(
@@ -99,17 +94,13 @@ fun InfoItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        // Icon di kiri
         Icon(
             imageVector = icon,
             contentDescription = label,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(24.dp)
         )
-
         Spacer(modifier = Modifier.width(12.dp))
-
-        // Kolom label + value
         Column {
             Text(
                 text = label,
@@ -128,15 +119,13 @@ fun InfoItem(
 }
 
 // ============================================================
-// COMPOSABLE 3: ProfileCard
-// Card yang membungkus konten dengan elevasi
-// Menggunakan: Card, Column, Divider
+// COMPOSABLE 3: ProfileCard — Slot API
 // ============================================================
 @Composable
 fun ProfileCard(
     title: String,
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit   // slot pattern - konten fleksibel
+    content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
         modifier = modifier
@@ -144,37 +133,27 @@ fun ProfileCard(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            // Judul card
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
-
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
                 thickness = 1.dp,
                 color = MaterialTheme.colorScheme.outlineVariant
             )
-
-            // Konten dinamis dari caller
             content()
         }
     }
 }
 
 // ============================================================
-// COMPOSABLE 4 (Bonus): BioSection
-// Menampilkan teks bio/deskripsi singkat
-// Menggunakan: Card, Text, Column
+// COMPOSABLE 4: BioSection
 // ============================================================
 @Composable
 fun BioSection(
@@ -187,13 +166,9 @@ fun BioSection(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Info,
@@ -209,14 +184,187 @@ fun BioSection(
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
-
             Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = bio,
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 lineHeight = 22.sp
+            )
+        }
+    }
+}
+
+// ============================================================
+// COMPOSABLE BARU: EditProfileForm
+// Form untuk edit nama dan bio — state hoisting via parameter
+// ============================================================
+@Composable
+fun EditProfileForm(
+    editName: String,
+    editBio: String,
+    onNameChange: (String) -> Unit,
+    onBioChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Judul form
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Edit Profil",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+
+            // TextField untuk Nama — State hoisting: nilai & callback dari luar
+            OutlinedTextField(
+                value = editName,
+                onValueChange = onNameChange,
+                label = { Text("Nama") },
+                leadingIcon = {
+                    Icon(Icons.Default.Person, contentDescription = null)
+                },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // TextField untuk Bio — State hoisting: nilai & callback dari luar
+            OutlinedTextField(
+                value = editBio,
+                onValueChange = onBioChange,
+                label = { Text("Bio") },
+                leadingIcon = {
+                    Icon(Icons.Default.Info, contentDescription = null)
+                },
+                minLines = 3,
+                maxLines = 5,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Tombol Save dan Cancel
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onCancel,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Batal")
+                }
+
+                Button(
+                    onClick = onSave,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Simpan")
+                }
+            }
+        }
+    }
+}
+
+// ============================================================
+// COMPOSABLE BARU: DarkModeToggle
+// Switch dark/light mode yang terhubung ke ViewModel
+// ============================================================
+@Composable
+fun DarkModeToggle(
+    isDarkMode: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = if (isDarkMode) Icons.Default.Star else Icons.Default.Star,
+                    contentDescription = "Mode Tampilan",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = "Mode Tampilan",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = if (isDarkMode) "Dark Mode" else "Light Mode",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Switch(
+                checked = isDarkMode,
+                onCheckedChange = { onToggle() },
+                thumbContent = {
+                    Icon(
+                        imageVector = if (isDarkMode) Icons.Default.Star else Icons.Default.Star,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             )
         }
     }
