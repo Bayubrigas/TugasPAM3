@@ -135,3 +135,5 @@ com.example.profileapp/
 
 ## Screenshot Aplikasi
 <img width="1080" height="2400" alt="Image" src="https://github.com/user-attachments/assets/5bf18c11-c7e3-48f2-966c-ec86575752ff" />
+<img width="1080" height="2400" alt="Screenshot_20260326_095438" src="https://github.com/user-attachments/assets/87c1b023-3b94-4bf4-8856-78cc62c2537f" />
+<img width="1080" height="2400" alt="Screenshot_20260326_095501" src="https://github.com/user-attachments/assets/5f3b2a8d-6101-4c90-8ec1-52a9c0ed57a5" />
